@@ -26,7 +26,6 @@ class MyNetwork(AlexNet):
 
         # [TODO] Modify feature extractor part in AlexNet
         self.features = nn.Sequential(
-            # Add your own layers here
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
@@ -39,7 +38,21 @@ class MyNetwork(AlexNet):
             nn.ReLU(inplace=True),
             nn.Conv2d(256, 256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),  #added conv layer
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
+        )
+        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(256 * 6 * 6, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Linear(4096, 4096),  #added fc layer
+            nn.ReLU(inplace=True),
+            nn.Linear(4096, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
