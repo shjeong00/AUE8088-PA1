@@ -31,6 +31,7 @@ class MyF1Score(Metric):
             f1_score = 2 * (precision * recall) / (precision + recall + epsilon)
             per_class_f1_scores.append(f1_score)
         return torch.mean(torch.stack(per_class_f1_scores))
+        
 class MyAccuracy(Metric):
     def __init__(self):
         super().__init__()
@@ -39,14 +40,19 @@ class MyAccuracy(Metric):
     def update(self, preds, target):
         # [TODO] The preds (B x C tensor), so take argmax to get index with highest confidence
         preds = torch.argmax(preds, dim=1)
+        
         # [TODO] check if preds and target have equal shape
         if preds.shape != target.shape:
             raise ValueError("Shape of predictions and targets do not match")
+        
         # [TODO] Cound the number of correct prediction
         correct = torch.sum(preds == target)
+        
         # Accumulate to self.correct
         self.correct += correct
+        
         # Count the number of elements in target
         self.total += target.numel()
+        
     def compute(self):
         return self.correct.float() / self.total.float()
