@@ -13,6 +13,7 @@ import torch
 from src.dataset import TinyImageNetDatasetModule
 from src.network import SimpleClassifier
 import src.config as cfg
+import wandb
 
 torch.set_float32_matmul_precision('medium')
 
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     datamodule = TinyImageNetDatasetModule(
         batch_size = cfg.BATCH_SIZE,
     )
-
+    wandb.login(key="305d390fc0d63d035aa317c7211a0c7a1d7d98ba", relogin=True)
     wandb_logger = WandbLogger(
         project = cfg.WANDB_PROJECT,
         save_dir = cfg.WANDB_SAVE_DIR,

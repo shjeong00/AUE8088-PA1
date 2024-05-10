@@ -13,6 +13,8 @@ import torch
 
 # Custom packages
 from src.metric import MyAccuracy
+#####- i fixed here!! -#####
+from src.metric import MyF1Score
 import src.config as cfg
 from src.util import show_setting
 
@@ -23,7 +25,22 @@ class MyNetwork(AlexNet):
         super().__init__()
 
         # [TODO] Modify feature extractor part in AlexNet
-
+        self.features = nn.Sequential(
+            # Add your own layers here
+            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(64, 192, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(192, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # [TODO: Optional] Modify this as well if you want
@@ -56,6 +73,8 @@ class SimpleClassifier(LightningModule):
 
         # Metric
         self.accuracy = MyAccuracy()
+        #####- i fixed here!! -#####
+        self.f1score = MyF1Score(num_classes=num_classes)
 
         # Hyperparameters
         self.save_hyperparameters()
@@ -79,14 +98,18 @@ class SimpleClassifier(LightningModule):
     def training_step(self, batch, batch_idx):
         loss, scores, y = self._common_step(batch)
         accuracy = self.accuracy(scores, y)
-        self.log_dict({'loss/train': loss, 'accuracy/train': accuracy},
+        #####- i fixed here!! -#####
+        f1score = self.f1score(scores, y)
+        self.log_dict({'loss/train': loss, 'accuracy/train': accuracy, 'f1score/train': f1score},
                       on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, scores, y = self._common_step(batch)
         accuracy = self.accuracy(scores, y)
-        self.log_dict({'loss/val': loss, 'accuracy/val': accuracy},
+        #####- i fixed here!! -#####
+        f1score = self.f1score(scores, y)
+        self.log_dict({'loss/val': loss, 'accuracy/val': accuracy, 'f1score/val': f1score},
                       on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self._wandb_log_image(batch, batch_idx, scores, frequency = cfg.WANDB_IMG_LOG_FREQ)
 
